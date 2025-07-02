@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Player</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .menu {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+        
+        .menu-btn {
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .menu-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .file-input-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .file-input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            width: 400px;
+            margin-right: 10px;
+        }
+        
+        .file-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .load-btn {
+            padding: 10px 20px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .load-btn:hover {
+            background: #45a049;
+        }
+        
+        .player-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .album-art {
+            width: 200px;
+            height: 200px;
+            border-radius: 15px;
+            margin: 0 auto 20px;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .album-art img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+        }
+        
+        .track-info {
+            margin: 20px 0;
+        }
+        
+        .track-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .track-artist {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        
+        .track-length {
+            font-size: 16px;
+            opacity: 0.6;
+        }
+        
+        .audio-player {
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .playlist-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            margin: 10px 0;
+        }
+        
+        .progress {
+            height: 100%;
+            background: #4CAF50;
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Media Player</h1>
+        
+        <div class="menu">
+            <button class="menu-btn" onclick="showLoadPlaylist()">Load Playlist</button>
+            <button class="menu-btn" onclick="showLoadFile()">Load File</button>
+        </div>
+        
+        <div id="loadPlaylistContainer" class="file-input-container hidden">
+            <h3>Load Playlist</h3>
+            <input type="text" id="playlistPath" class="file-input" 
+                   placeholder="Enter path to playlist file (.m3u, .m3u8, .json)" 
+                   value="playlist.m3u">
+            <button class="load-btn" onclick="loadPlaylist()">Load Playlist</button>
+        </div>
+        
+        <div id="loadFileContainer" class="file-input-container hidden">
+            <h3>Load Media File</h3>
+            <input type="text" id="filePath" class="file-input" 
+                   placeholder="Enter path to media file">
+            <button class="load-btn" onclick="loadFile()">Load File</button>
+        </div>
+        
+        <div id="errorContainer" class="error hidden"></div>
+        
+        <div id="playerContainer" class="player-container hidden">
+            <div id="albumArt" class="album-art">
+                🎵
+            </div>
+            
+            <div class="track-info">
+                <div id="trackTitle" class="track-title">No Track Selected</div>
+                <div id="trackArtist" class="track-artist"></div>
+                <div id="trackLength" class="track-length"></div>
+            </div>
+            
+            <audio id="audioPlayer" class="audio-player" controls></audio>
+            <audio id="audioPlayerNext" style="display: none;"></audio>
+            
+            <div class="progress-bar">
+                <div id="progress" class="progress"></div>
+            </div>
+        </div>
+        
+        <div id="playlistInfo" class="playlist-info hidden">
+            <div id="playlistStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentPlaylist = [];
+        let currentTrackIndex = 0;
+        let isPlaylistMode = false;
+        let crossfadeStarted = false;
+        let nextTrackPreloaded = false;
+        const CROSSFADE_DURATION = 3.5; // seconds
+        
+        function showError(message) {
+            const errorContainer = document.getElementById('errorContainer');
+            errorContainer.textContent = message;
+            errorContainer.classList.remove('hidden');
+            setTimeout(() => {
+                errorContainer.classList.add('hidden');
+            }, 5000);
+        }
+        
+        function hideAllContainers() {
+            document.getElementById('loadPlaylistContainer').classList.add('hidden');
+            document.getElementById('loadFileContainer').classList.add('hidden');
+        }
+        
+        function showLoadPlaylist() {
+            hideAllContainers();
+            document.getElementById('loadPlaylistContainer').classList.remove('hidden');
+        }
+        
+        function showLoadFile() {
+            hideAllContainers();
+            document.getElementById('loadFileContainer').classList.remove('hidden');
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        function updateDisplay(track) {
+            const playerContainer = document.getElementById('playerContainer');
+            const albumArt = document.getElementById('albumArt');
+            const trackTitle = document.getElementById('trackTitle');
+            const trackArtist = document.getElementById('trackArtist');
+            const trackLength = document.getElementById('trackLength');
+            
+            playerContainer.classList.remove('hidden');
+            
+            // Update album art
+            if (track.metadata.picture) {
+                albumArt.innerHTML = `<img src="data:image/jpeg;base64,${track.metadata.picture}" alt="Album Art">`;
+            } else {
+                albumArt.innerHTML = '🎵';
+            }
+            
+            // Update track info
+            trackTitle.textContent = track.metadata.title || 'Unknown Title';
+            trackArtist.textContent = track.metadata.artist || 'Unknown Artist';
+            trackLength.textContent = track.metadata.length ? formatTime(track.metadata.length) : '';
+        }
+        
+        function updatePlaylistStatus() {
+            if (isPlaylistMode) {
+                const playlistStatus = document.getElementById('playlistStatus');
+                const playlistInfo = document.getElementById('playlistInfo');
+                
+                playlistStatus.textContent = `Playing track ${currentTrackIndex + 1} of ${currentPlaylist.length}`;
+                playlistInfo.classList.remove('hidden');
+            }
+        }
+        
+        function playTrack(track) {
+            const audioPlayer = document.getElementById('audioPlayer');
+            
+            updateDisplay(track);
+            
+            // Reset crossfade state
+            crossfadeStarted = false;
+            nextTrackPreloaded = false;
+            
+            // Since we can't directly serve local files in a web browser,
+            // we'll simulate the audio player functionality
+            audioPlayer.src = `/serve_audio/${encodeURIComponent(track.file_path)}`;
+            audioPlayer.volume = 1;
+            
+            // Preload next track for playlist mode
+            if (isPlaylistMode) {
+                audioPlayer.onloadedmetadata = () => {
+                    preloadNextTrack();
+                };
+            }
+            
+            audioPlayer.onended = () => {
+                // Handle end of track for single file mode
+                if (!isPlaylistMode) {
+                    if (track.file_id) {
+                        fetch('/update_played', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ file_id: track.file_id })
+                        });
+                    }
+                }
+                // For playlist mode, crossfade handling takes care of track transitions
+            };
+            
+            audioPlayer.play().catch(e => {
+                showError(`Error playing audio: ${e.message}`);
+            });
+        }
+        
+        function preloadNextTrack() {
+            if (isPlaylistMode && currentTrackIndex < currentPlaylist.length - 1) {
+                const nextTrack = currentPlaylist[currentTrackIndex + 1];
+                const audioPlayerNext = document.getElementById('audioPlayerNext');
+                audioPlayerNext.src = `/serve_audio/${encodeURIComponent(nextTrack.file_path)}`;
+                audioPlayerNext.load();
+                nextTrackPreloaded = true;
+            }
+        }
+        
+        function startCrossfade() {
+            if (!isPlaylistMode || currentTrackIndex >= currentPlaylist.length - 1 || crossfadeStarted) {
+                return;
+            }
+            
+            const audioPlayer = document.getElementById('audioPlayer');
+            const audioPlayerNext = document.getElementById('audioPlayerNext');
+            const nextTrack = currentPlaylist[currentTrackIndex + 1];
+            
+            crossfadeStarted = true;
+            
+            // Start playing the next track
+            audioPlayerNext.volume = 0;
+            audioPlayerNext.play().catch(e => {
+                console.warn(`Error starting next track: ${e.message}`);
+            });
+            
+            // Crossfade effect: fade out current, fade in next
+            const fadeInterval = 50; // milliseconds
+            const fadeSteps = (CROSSFADE_DURATION * 1000) / fadeInterval;
+            const volumeStep = 1 / fadeSteps;
+            let step = 0;
+            
+            const crossfadeTimer = setInterval(() => {
+                step++;
+                const progress = step / fadeSteps;
+                
+                // Fade out current track
+                audioPlayer.volume = Math.max(0, 1 - progress);
+                
+                // Fade in next track
+                audioPlayerNext.volume = Math.min(1, progress);
+                
+                if (step >= fadeSteps) {
+                    clearInterval(crossfadeTimer);
+                    // Switch to next track
+                    switchToNextTrack();
+                }
+            }, fadeInterval);
+        }
+        
+        function switchToNextTrack() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            const audioPlayerNext = document.getElementById('audioPlayerNext');
+            const currentTrack = currentPlaylist[currentTrackIndex];
+            
+            // Update last played timestamp for the completed track
+            if (currentTrack.file_id) {
+                fetch('/update_played', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ file_id: currentTrack.file_id })
+                });
+            }
+            
+            // Stop current track
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            
+            // Move to next track
+            currentTrackIndex++;
+            const nextTrack = currentPlaylist[currentTrackIndex];
+            
+            // Switch audio elements
+            audioPlayer.src = audioPlayerNext.src;
+            audioPlayer.currentTime = audioPlayerNext.currentTime;
+            audioPlayer.volume = 1;
+            audioPlayer.play();
+            
+            // Update display
+            updateDisplay(nextTrack);
+            updatePlaylistStatus();
+            
+            // Reset crossfade state
+            crossfadeStarted = false;
+            nextTrackPreloaded = false;
+            
+            // Preload the next track if available
+            preloadNextTrack();
+        }
+        
+        async function loadPlaylist() {
+            const filePath = document.getElementById('playlistPath').value.trim();
+            if (!filePath) {
+                showError('Please enter a file path');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/load_playlist', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ file_path: filePath })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showError(data.error);
+                    return;
+                }
+                
+                currentPlaylist = data.playlist;
+                currentTrackIndex = 0;
+                isPlaylistMode = true;
+                
+                if (currentPlaylist.length > 0) {
+                    playTrack(currentPlaylist[currentTrackIndex]);
+                    updatePlaylistStatus();
+                } else {
+                    showError('No playable tracks found in playlist');
+                }
+                
+            } catch (error) {
+                showError(`Error loading playlist: ${error.message}`);
+            }
+        }
+        
+        async function loadFile() {
+            const filePath = document.getElementById('filePath').value.trim();
+            if (!filePath) {
+                showError('Please enter a file path');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/load_file', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ file_path: filePath })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showError(data.error);
+                    return;
+                }
+                
+                isPlaylistMode = false;
+                document.getElementById('playlistInfo').classList.add('hidden');
+                playTrack(data);
+                
+            } catch (error) {
+                showError(`Error loading file: ${error.message}`);
+            }
+        }
+        
+        // Update progress bar and handle crossfade timing
+        document.getElementById('audioPlayer').addEventListener('timeupdate', function() {
+            const progress = document.getElementById('progress');
+            const audio = this;
+            if (audio.duration > 0) {
+                const progressPercent = (audio.currentTime / audio.duration) * 100;
+                progress.style.width = progressPercent + '%';
+                
+                // Check if we need to start crossfade
+                const timeRemaining = audio.duration - audio.currentTime;
+                if (isPlaylistMode && !crossfadeStarted && nextTrackPreloaded && 
+                    timeRemaining <= CROSSFADE_DURATION && timeRemaining > 0 &&
+                    currentTrackIndex < currentPlaylist.length - 1) {
+                    startCrossfade();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
