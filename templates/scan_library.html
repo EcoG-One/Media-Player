@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Library - Radio Scheduler</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 300;
+        }
+        .form-section {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .result-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .result-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+        .result-error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+        .result-warning {
+            background: #fef5e7;
+            color: #744210;
+            border: 1px solid #f6d55c;
+        }
+        .directories-list {
+            background: #f7fafc;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .directories-list div {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .scan-details {
+            margin-top: 15px;
+            background: #f7fafc;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .detail-item:last-child {
+            margin-bottom: 0;
+            font-weight: 600;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 8px;
+        }
+        .info-section {
+            background: #ebf8ff;
+            border: 1px solid #90cdf4;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .info-section h3 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        .info-section ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .info-section li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Main Menu</a>
+
+        <h1>📁 Scan Music Library</h1>
+
+        <div class="info-section">
+            <h3>What this scan does:</h3>
+            <ul>
+                <li><strong>Adds new files:</strong> Discovers and adds new audio files to the database</li>
+                <li><strong>Updates metadata:</strong> Refreshes metadata for existing files if tags have changed</li>
+                <li><strong>Removes missing files:</strong> Cleans up database entries for files that no longer exist</li>
+                <li><strong>Multiple directories:</strong> Scans multiple music library locations simultaneously</li>
+                <li><strong>Supported formats:</strong> MP3, FLAC, M4A, WAV, OGG</li>
+            </ul>
+        </div>
+
+        <div class="form-section">
+            <h3>Music Library Directories</h3>
+            <form id="scanForm">
+                <div class="form-group">
+                    <label for="folder_paths">Music Library Paths (one per line):</label>
+                    <textarea id="folder_paths"
+                              name="folder_paths"
+                              placeholder="Enter directory paths, one per line:&#10;/home/user/Music&#10;/media/music&#10;C:\Music&#10;D:\Audio Files"
+                              required></textarea>
+                    <small style="color: #718096; font-size: 14px; margin-top: 5px; display: block;">
+                        💡 Tip: You can add multiple directories to scan your entire music collection at once
+                    </small>
+                </div>
+                <button type="submit" class="btn" id="scanButton">
+                    🔍 Start Library Scan
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                Scanning library... This may take a while for large collections.
+            </div>
+
+            <div class="result-message" id="resultMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('scanForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('folder_paths', document.getElementById('folder_paths').value);
+
+            // Show loading state
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('scanButton').disabled = true;
+            document.getElementById('scanButton').textContent = 'Scanning...';
+            document.getElementById('resultMessage').style.display = 'none';
+
+            fetch('/scan_library', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading state
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('scanButton').disabled = false;
+                document.getElementById('scanButton').textContent = '🔍 Start Library Scan';
+
+                // Show result
+                const resultDiv = document.getElementById('resultMessage');
+                resultDiv.style.display = 'block';
+
+                if (data.error) {
+                    resultDiv.className = 'result-message result-error';
+                    resultDiv.innerHTML = '<strong>Error:</strong> ' + data.error;
+                } else if (data.warning) {
+                    resultDiv.className = 'result-message result-warning';
+                    let content = '<strong>Warning:</strong> ' + data.warning;
+                    if (data.valid_paths && data.valid_paths.length > 0) {
+                        content += '<br><strong>Valid paths found:</strong>';
+                        content += '<div class="directories-list">';
+                        data.valid_paths.forEach(path => {
+                            content += '<div>✓ ' + path + '</div>';
+                        });
+                        content += '</div>';
+                        content += 'Please correct the invalid paths and try again.';
+                    }
+                    resultDiv.innerHTML = content;
+                } else {
+                    resultDiv.className = 'result-message result-success';
+                    let content = '<strong>Success:</strong> ' + data.message;
+
+                    if (data.details) {
+                        content += '<div class="scan-details">';
+                        content += '<div class="detail-item"><span>Files Added:</span><span>' + data.details.added + '</span></div>';
+                        content += '<div class="detail-item"><span>Files Updated:</span><span>' + data.details.updated + '</span></div>';
+                        content += '<div class="detail-item"><span>Files Removed:</span><span>' + data.details.removed + '</span></div>';
+                        content += '<div class="detail-item"><span>Total Files Scanned:</span><span>' + data.details.total_scanned + '</span></div>';
+                        content += '<div class="detail-item"><span>Directories Scanned:</span><span>' + data.details.valid_paths_count + '</span></div>';
+                        content += '</div>';
+
+                        if (data.details.directories_scanned) {
+                            content += '<strong>Scanned Directories:</strong>';
+                            content += '<div class="directories-list">';
+                            data.details.directories_scanned.forEach(dir => {
+                                content += '<div>📁 ' + dir + '</div>';
+                            });
+                            content += '</div>';
+                        }
+                    }
+                    
+                    resultDiv.innerHTML = content;
+                }
+            })
+            .catch(error => {
+                // Hide loading state
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('scanButton').disabled = false;
+                document.getElementById('scanButton').textContent = '🔍 Start Library Scan';
+                
+                // Show error
+                const resultDiv = document.getElementById('resultMessage');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result-message result-error';
+                resultDiv.innerHTML = '<strong>Error:</strong> Failed to scan library. Please try again.';
+                console.error('Scan error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

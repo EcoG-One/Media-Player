@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combine Clocks - Radio Scheduler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .file-input-group {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .file-input-group label {
+            margin-bottom: 5px;
+            font-weight: normal;
+            color: #666;
+        }
+        .add-file-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .add-file-btn:hover {
+            background-color: #218838;
+        }
+        .remove-file-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .remove-file-btn:hover {
+            background-color: #c82333;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .instructions {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .instructions ul {
+            margin-bottom: 0;
+        }
+        .nav-links {
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Combine Clock Files</h1>
+        
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ul>
+                <li>Enter the full paths to the clock JSON files you want to combine</li>
+                <li>Click "Add Another File" to add more file paths</li>
+                <li>Enter a filename for the combined clock (will be saved as .json)</li>
+                <li>Click "Combine Clocks" to merge all files into one</li>
+            </ul>
+        </div>
+
+        {% if success %}
+        <div class="alert alert-success">
+            {{ success }}
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-error">
+            Error: {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post" id="combineForm">
+            <div id="fileInputs">
+                <div class="file-input-group">
+                    <label for="file_path_0">Clock File Path 1:</label>
+                    <input type="text" name="file_paths" id="file_path_0" placeholder="e.g., /path/to/clock1.json" required>
+                </div>
+                <div class="file-input-group">
+                    <label for="file_path_1">Clock File Path 2:</label>
+                    <input type="text" name="file_paths" id="file_path_1" placeholder="e.g., /path/to/clock2.json" required>
+                </div>
+            </div>
+            
+            <button type="button" class="add-file-btn" onclick="addFileInput()">Add Another File</button>
+            
+            <div class="form-group" style="margin-top: 20px;">
+                <label for="filename">Combined Clock Filename:</label>
+                <input type="text" name="filename" id="filename" placeholder="combined_clock" required>
+                <small style="color: #666;">(.json extension will be added automatically)</small>
+            </div>
+            
+            <button type="submit" class="btn">Combine Clocks</button>
+        </form>
+        
+        <div class="nav-links">
+            <a href="/" class="btn-secondary">Back to Home</a>
+            <a href="/create_clock" class="btn-secondary">Create Clock</a>
+            <a href="/edit_clock" class="btn-secondary">Edit Clock</a>
+        </div>
+    </div>
+
+    <script>
+        let fileInputCount = 2;
+        
+        function addFileInput() {
+            const fileInputs = document.getElementById('fileInputs');
+            const newInputGroup = document.createElement('div');
+            newInputGroup.className = 'file-input-group';
+            newInputGroup.innerHTML = `
+                <label for="file_path_${fileInputCount}">Clock File Path ${fileInputCount + 1}:</label>
+                <input type="text" name="file_paths" id="file_path_${fileInputCount}" placeholder="e.g., /path/to/clock${fileInputCount + 1}.json">
+                <button type="button" class="remove-file-btn" onclick="removeFileInput(this)">Remove</button>
+            `;
+            fileInputs.appendChild(newInputGroup);
+            fileInputCount++;
+        }
+        
+        function removeFileInput(button) {
+            const inputGroup = button.parentElement;
+            inputGroup.remove();
+        }
+        
+        // Prevent form submission if all file inputs are empty
+        document.getElementById('combineForm').addEventListener('submit', function(e) {
+            const fileInputs = document.querySelectorAll('input[name="file_paths"]');
+            let hasValidInput = false;
+            
+            fileInputs.forEach(input => {
+                if (input.value.trim() !== '') {
+                    hasValidInput = true;
+                }
+            });
+            
+            if (!hasValidInput) {
+                e.preventDefault();
+                alert('Please enter at least one valid file path.');
+            }
+        });
+    </script>
+</body>
+</html>

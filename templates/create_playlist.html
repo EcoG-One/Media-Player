@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Playlist - Radio Scheduler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .instructions {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .instructions ul {
+            margin-bottom: 0;
+        }
+        .nav-links {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .file-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+        .file-info h4 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .form-section {
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .form-section h3 {
+            margin-top: 0;
+            color: #495057;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            min-width: 150px;
+            margin-right: 15px;
+            margin-bottom: 0;
+        }
+        .input-group input {
+            flex: 1;
+        }
+        .playlist-stats {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .playlist-stats h4 {
+            margin-top: 0;
+        }
+        .file-browse {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 3px;
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create Playlist from Clock</h1>
+        
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ul>
+                <li>Enter the full path to a clock JSON file created earlier</li>
+                <li>Specify a filename for the playlist (both .json and .m3u files will be created)</li>
+                <li>The system will select songs from your database based on the clock's slot criteria</li>
+                <li>Songs are selected based on least recently played to ensure rotation</li>
+                <li>Both a JSON playlist and M3U playlist will be generated</li>
+            </ul>
+        </div>
+
+        {% if success %}
+        <div class="alert alert-success">
+            {{ success }}
+            {% if playlist_count %}
+            <div class="playlist-stats">
+                <h4>Playlist Statistics:</h4>
+                <p><strong>Total Songs:</strong> {{ playlist_count }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-error">
+            Error: {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            <div class="form-section">
+                <h3>Clock File Selection</h3>
+                <div class="form-group">
+                    <label for="file_path">Clock File Path:</label>
+                    <input type="text" name="file_path" id="file_path" placeholder="e.g., /path/to/clock.json" required>
+                    <div class="file-browse">
+                        <strong>Tip:</strong> Enter the full path to your clock JSON file. You can find clock files you've created in the "Create Clock" or "Edit Clock" sections.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>Playlist Output Settings</h3>
+                <div class="form-group">
+                    <label for="playlist_filename">Playlist Filename:</label>
+                    <input type="text" name="playlist_filename" id="playlist_filename" placeholder="my_playlist" required>
+                    <div class="file-browse">
+                        <strong>Note:</strong> Both .json and .m3u files will be created automatically (e.g., "my_playlist.json" and "my_playlist.m3u")
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn">Create Playlist</button>
+        </form>
+        
+        <div class="file-info">
+            <h4>About Playlist Files:</h4>
+            <p><strong>JSON File:</strong> Contains detailed information about each song including file paths and database IDs for internal use.</p>
+            <p><strong>M3U File:</strong> Standard playlist format that can be opened in most media players like VLC, Winamp, foobar2000, etc.</p>
+        </div>
+        
+        <div class="nav-links">
+            <a href="/" class="btn-secondary">Back to Home</a>
+            <a href="/create_clock" class="btn-secondary">Create Clock</a>
+            <a href="/edit_clock" class="btn-secondary">Edit Clock</a>
+            <a href="/combine_clocks" class="btn-secondary">Combine Clocks</a>
+        </div>
+    </div>
+
+    <script>
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const filePath = document.getElementById('file_path').value.trim();
+            const playlistFilename = document.getElementById('playlist_filename').value.trim();
+            
+            if (!filePath) {
+                e.preventDefault();
+                alert('Please enter a clock file path.');
+                return;
+            }
+            
+            if (!playlistFilename) {
+                e.preventDefault();
+                alert('Please enter a playlist filename.');
+                return;
+            }
+            
+            // Check if file path ends with .json
+            if (!filePath.toLowerCase().endsWith('.json')) {
+                if (!confirm('The file path should end with .json. Are you sure this is correct?')) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+        });
+        
+        // Auto-suggest .json extension for file path
+        document.getElementById('file_path').addEventListener('blur', function() {
+            const value = this.value.trim();
+            if (value && !value.toLowerCase().endsWith('.json')) {
+                // Don't auto-add, just show a subtle hint
+                this.style.borderColor = '#ffc107';
+                this.title = 'Clock files should typically end with .json';
+            } else {
+                this.style.borderColor = '#ddd';
+                this.title = '';
+            }
+        });
+    </script>
+</body>
+</html>

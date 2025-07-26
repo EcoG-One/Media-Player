@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Clock - Radio Scheduler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .form-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            display: block;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #e74c3c;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+        
+        .btn-success:hover {
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+        
+        .clock-editor {
+            background: #2c3e50;
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .clock-editor h3 {
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        
+        .slot-editor {
+            background: #34495e;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .slot-editor:last-child {
+            margin-bottom: 0;
+        }
+        
+        .slot-header {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #ecf0f1;
+            font-size: 1.1rem;
+        }
+        
+        .slot-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .slot-form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .slot-form-group label {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: #bdc3c7;
+        }
+        
+        .slot-form-group input,
+        .slot-form-group select {
+            padding: 8px;
+            border: 1px solid #95a5a6;
+            border-radius: 4px;
+            font-size: 14px;
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+        
+        .slot-form-group input:focus,
+        .slot-form-group select:focus {
+            outline: none;
+            border-color: #e74c3c;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .nav-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #e74c3c;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: #c0392b;
+        }
+        
+        .file-input-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
+        }
+        
+        .save-section {
+            background: #e8f5e8;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #27ae60;
+        }
+        
+        @media (max-width: 768px) {
+            .slot-form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Edit Clock</h1>
+            <p>Modify your radio programming schedule</p>
+        </div>
+        
+        <div class="content">
+            {% if success %}
+                <div class="alert alert-success">
+                    {{ success }}
+                </div>
+            {% endif %}
+            
+            {% if error %}
+                <div class="alert alert-error">
+                    {{ error }}
+                </div>
+            {% endif %}
+            
+            {% if not loaded %}
+                <div class="file-input-section">
+                    <h2>Load Clock File</h2>
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="file_path">Clock File Path:</label>
+                            <input type="text" id="file_path" name="file_path" placeholder="path/to/clock.json" required>
+                        </div>
+                        <button type="submit" name="load" class="btn">Load Clock</button>
+                    </form>
+                </div>
+            {% endif %}
+            
+            {% if loaded and clock %}
+                <div class="clock-editor">
+                    <h3>Editing Clock ({{ clock|length }} slots)</h3>
+                    
+                    <form method="POST">
+                        <input type="hidden" name="original_file_path" value="{{ file_path }}">
+                        
+                        {% for slot in clock %}
+                            <div class="slot-editor">
+                                <div class="slot-header">Slot {{ loop.index }}</div>
+                                <div class="slot-form-grid">
+                                    <div class="slot-form-group">
+                                        <label>Genre:</label>
+                                        <input type="text" name="genre_{{ loop.index0 }}" value="{{ slot.genre or '' }}" placeholder="e.g., Rock, Pop">
+                                    </div>
+                                    
+                                    <div class="slot-form-group">
+                                        <label>Mood:</label>
+                                        <input type="text" name="mood_{{ loop.index0 }}" value="{{ slot.mood or '' }}" placeholder="e.g., Upbeat, Calm">
+                                    </div>
+                                    
+                                    <div class="slot-form-group">
+                                        <label>Year:</label>
+                                        <input type="number" name="year_{{ loop.index0 }}" value="{{ slot.year or '' }}" min="1900" max="2030" placeholder="e.g., 2020">
+                                    </div>
+                                    
+                                    <div class="slot-form-group">
+                                        <label>Tempo (BPM):</label>
+                                        <input type="number" name="tempo_{{ loop.index0 }}" value="{{ slot.tempo or '' }}" min="0" max="300" placeholder="e.g., 120">
+                                    </div>
+                                    
+                                    <div class="slot-form-group">
+                                        <label>Rotation:</label>
+                                        <select name="rotation_{{ loop.index0 }}">
+                                            <option value="1" {% if slot.rotation == 1 %}selected{% endif %}>Heavy (1)</option>
+                                            <option value="2" {% if slot.rotation == 2 %}selected{% endif %}>Medium (2)</option>
+                                            <option value="3" {% if slot.rotation == 3 %}selected{% endif %}>Light (3)</option>
+                                            <option value="4" {% if slot.rotation == 4 %}selected{% endif %}>Rare (4)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        
+                        <div class="save-section">
+                            <button type="submit" name="save" class="btn btn-success">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            {% endif %}
+            
+            <a href="/" class="nav-link">← Back to Main Menu</a>
+        </div>
+    </div>
+</body>
+</html>

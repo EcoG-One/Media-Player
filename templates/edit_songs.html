@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Songs - Radio Scheduler</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 300;
+        }
+        .search-section {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        .search-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #f5576c;
+        }
+        .btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .btn-secondary {
+            background: #718096;
+        }
+        .btn-play {
+            background: linear-gradient(135deg, #38a169 0%, #48bb78 100%);
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+        .btn-play:hover {
+            background: linear-gradient(135deg, #2f855a 0%, #38a169 100%);
+        }
+        .btn-stop {
+            background: linear-gradient(135deg, #e53e3e 0%, #f56565 100%);
+        }
+        .btn-stop:hover {
+            background: linear-gradient(135deg, #c53030 0%, #e53e3e 100%);
+        }
+        .results-section {
+            margin-top: 30px;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .results-table th {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 500;
+        }
+        .results-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .results-table tr:hover {
+            background: #f7fafc;
+        }
+        .edit-form {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        .edit-form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .edit-form input[type="text"], .edit-form input[type="number"] {
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+        .alert-error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #f5576c;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .no-results {
+            text-align: center;
+            color: #718096;
+            font-style: italic;
+            margin-top: 20px;
+        }
+        .song-path {
+            font-size: 11px;
+            color: #666;
+            word-break: break-all;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .audio-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            padding: 15px;
+            min-width: 300px;
+            z-index: 1000;
+            display: none;
+        }
+        .audio-player.active {
+            display: block;
+        }
+        .player-info {
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .close-player {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #718096;
+        }
+        .error-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1001;
+            display: none;
+        }
+        .error-notification.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Main Menu</a>
+
+        <h1>✏️ Edit Songs</h1>
+
+        {% if success %}
+        <div class="alert alert-success">
+            <strong>Success:</strong> {{ success }}
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-error">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="search-section">
+            <h3>Search Songs</h3>
+            <form method="post" class="search-form">
+                <div class="form-group">
+                    <label for="search_field">Search By:</label>
+                    <select id="search_field" name="search_field">
+                        <option value="artist">Artist</option>
+                        <option value="song_title">Song Title</option>
+                        <option value="genre">Genre</option>
+                        <option value="mood">Mood</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="search_term">Search Term:</label>
+                    <input type="text" id="search_term" name="search_term"
+                           placeholder="Enter search term..." required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" name="search" class="btn">Search</button>
+                </div>
+            </form>
+        </div>
+
+        {% if search_performed %}
+        <div class="results-section">
+            <h3>Search Results</h3>
+            {% if results %}
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Artist</th>
+                        <th>Song Title</th>
+                        <th>Duration</th>
+                        <th>Genre</th>
+                        <th>Mood</th>
+                        <th>Year</th>
+                        <th>Tempo</th>
+                        <th>Rotation</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for song in results %}
+                    <tr>
+                        <td>{{ song.artist }}</td>
+                        <td>{{ song.song_title }}</td>
+                        <td>{{ song.duration }}s</td>
+                        <td>{{ song.genre }}</td>
+                        <td>{{ song.mood }}</td>
+                        <td>{{ song.year }}</td>
+                        <td>{{ song.tempo }}</td>
+                        <td>{{ song.rotation }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button onclick="playSong(this.dataset.path, this.dataset.artist, this.dataset.title)"
+                                        class="btn btn-play" id="play-btn-{{ song.id }}"
+                                        data-path="{{ song.path|e }}"
+                                        data-artist="{{ song.artist|e }}"
+                                        data-title="{{ song.song_title|e }}">▶ Play</button>
+                                <button onclick="showEditForm({{ song.id }})" class="btn">Edit</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr id="edit-row-{{ song.id }}" style="display: none;">
+                        <td colspan="9">
+                            <form method="post" class="edit-form">
+                                <input type="hidden" name="song_id" value="{{ song.id }}">
+                                <!-- Add hidden fields to preserve original search context -->
+                                <input type="hidden" name="original_search_term" value="{{ request.form.get('search_term', '') }}">
+                                <input type="hidden" name="original_search_field" value="{{ request.form.get('search_field', 'artist') }}">
+
+                                <div class="edit-form-row">
+                                    <div>
+                                        <label>Artist:</label>
+                                        <input type="text" name="artist" value="{{ song.artist }}">
+                                    </div>
+                                    <div>
+                                        <label>Song Title:</label>
+                                        <input type="text" name="song_title" value="{{ song.song_title }}">
+                                    </div>
+                                    <div>
+                                        <label>Duration (seconds):</label>
+                                        <input type="number" name="duration" value="{{ song.duration }}">
+                                    </div>
+                                    <div>
+                                        <label>Genre:</label>
+                                        <input type="text" name="genre" value="{{ song.genre }}">
+                                    </div>
+                                </div>
+                                <div class="edit-form-row">
+                                    <div>
+                                        <label>Mood:</label>
+                                        <input type="text" name="mood" value="{{ song.mood }}">
+                                    </div>
+                                    <div>
+                                        <label>Year:</label>
+                                        <input type="number" name="year" value="{{ song.year }}">
+                                    </div>
+                                    <div>
+                                        <label>Tempo:</label>
+                                        <input type="number" name="tempo" value="{{ song.tempo }}">
+                                    </div>
+                                    <div>
+                                        <label>Rotation:</label>
+                                        <input type="number" name="rotation" value="{{ song.rotation }}" min="1" max="10">
+                                    </div>
+                                </div>
+                                <div class="song-path">File: {{ song.path }}</div>
+                                <div style="margin-top: 15px;">
+                                    <button type="submit" name="update" class="btn">Update Song</button>
+                                    <button type="button" onclick="hideEditForm({{ song.id }})" class="btn btn-secondary">Cancel</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-results">No songs found matching your search criteria.</div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Floating Audio Player -->
+    <div id="audioPlayer" class="audio-player">
+        <button class="close-player" onclick="closePlayer()">×</button>
+        <div class="player-info" id="playerInfo">Now Playing</div>
+        <div class="player-controls">
+            <audio id="audioElement" controls style="width: 100%;">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+    </div>
+
+    <!-- Error Notification -->
+    <div id="errorNotification" class="error-notification">
+        <span id="errorMessage"></span>
+        <button onclick="hideErrorNotification()" style="float: right; background: none; border: none; color: #742a2a; font-weight: bold; cursor: pointer; margin-left: 10px;">×</button>
+    </div>
+
+    <script>
+        let currentAudio = null;
+        let currentPlayButton = null;
+
+        function showEditForm(songId) {
+            document.getElementById('edit-row-' + songId).style.display = 'table-row';
+        }
+
+        function hideEditForm(songId) {
+            document.getElementById('edit-row-' + songId).style.display = 'none';
+        }
+
+        function showErrorNotification(message) {
+            const notification = document.getElementById('errorNotification');
+            const messageElement = document.getElementById('errorMessage');
+            messageElement.textContent = message;
+            notification.classList.add('show');
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                hideErrorNotification();
+            }, 5000);
+        }
+
+        function hideErrorNotification() {
+            const notification = document.getElementById('errorNotification');
+            notification.classList.remove('show');
+        }
+
+        function playSong(filePath, artist, title) {
+            // If called from data attributes, get the values from the button
+            if (typeof filePath === 'object' && filePath.dataset) {
+                const button = filePath;
+                filePath = button.dataset.path;
+                artist = button.dataset.artist;
+                title = button.dataset.title;
+            }
+
+            const audioPlayer = document.getElementById('audioPlayer');
+            const audioElement = document.getElementById('audioElement');
+            const playerInfo = document.getElementById('playerInfo');
+
+            // Stop current audio if playing
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio.removeEventListener('error', currentAudio._errorHandler);
+                currentAudio.removeEventListener('ended', currentAudio._endedHandler);
+                resetPlayButton();
+            }
+
+            // Create file URL - you might need to adjust this path based on your server setup
+            // This assumes you have a route to serve audio files
+            const audioUrl = `/serve_audio?path=${encodeURIComponent(filePath)}`;
+
+            // First, test if the audio file exists by making a HEAD request
+            fetch(audioUrl, { method: 'HEAD' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`File not found: ${response.status}`);
+                    }
+                    return response;
+                })
+                .then(() => {
+                    // File exists, proceed with loading audio
+                    setupAudioPlayer(audioElement, audioUrl, artist, title, audioPlayer, playerInfo);
+                })
+                .catch(error => {
+                    console.error('Error checking audio file:', error);
+                    showErrorNotification('Audio file not found or cannot be accessed.');
+                });
+        }
+
+        function setupAudioPlayer(audioElement, audioUrl, artist, title, audioPlayer, playerInfo) {
+            // Clear any existing event listeners
+            audioElement.removeEventListener('error', audioElement._errorHandler);
+            audioElement.removeEventListener('ended', audioElement._endedHandler);
+            audioElement.removeEventListener('loadstart', audioElement._loadstartHandler);
+            audioElement.removeEventListener('canplay', audioElement._canplayHandler);
+
+            // Set up new audio
+            audioElement.src = '';  // Clear first to prevent caching issues
+            audioElement.load();    // Reset the element
+            audioElement.src = audioUrl;
+            playerInfo.textContent = `${artist} - ${title}`;
+
+            // Show player
+            audioPlayer.classList.add('active');
+
+            // Create and store event handlers
+            const errorHandler = function(e) {
+                console.error('Audio loading error:', e);
+                showErrorNotification('Error loading audio file. The file may be corrupted or in an unsupported format.');
+                closePlayer();
+            };
+
+            const endedHandler = function() {
+                resetPlayButton();
+            };
+
+            const loadstartHandler = function() {
+                console.log('Started loading audio...');
+            };
+
+            const canplayHandler = function() {
+                console.log('Audio can start playing');
+            };
+
+            // Store handlers for cleanup
+            audioElement._errorHandler = errorHandler;
+            audioElement._endedHandler = endedHandler;
+            audioElement._loadstartHandler = loadstartHandler;
+            audioElement._canplayHandler = canplayHandler;
+
+            // Add event listeners
+            audioElement.addEventListener('error', errorHandler);
+            audioElement.addEventListener('ended', endedHandler);
+            audioElement.addEventListener('loadstart', loadstartHandler);
+            audioElement.addEventListener('canplay', canplayHandler);
+
+            // Set a timeout to catch infinite loading
+            const loadingTimeout = setTimeout(() => {
+                if (audioElement.readyState === 0) {  // HAVE_NOTHING
+                    console.error('Audio loading timeout');
+                    showErrorNotification('Audio file is taking too long to load. Please try again.');
+                    closePlayer();
+                }
+            }, 10000); // 10 second timeout
+
+            // Clear timeout when audio starts loading properly
+            audioElement.addEventListener('loadstart', () => {
+                clearTimeout(loadingTimeout);
+            }, { once: true });
+
+            // Play audio
+            audioElement.play().catch(error => {
+                console.error('Error playing audio:', error);
+                clearTimeout(loadingTimeout);
+                showErrorNotification('Error playing audio file. Please check if the file exists and is accessible.');
+                closePlayer();
+                return;
+            });
+
+            currentAudio = audioElement;
+        }
+
+        function resetPlayButton() {
+            if (currentPlayButton) {
+                currentPlayButton.textContent = '▶ Play';
+                currentPlayButton.classList.remove('btn-stop');
+                currentPlayButton.classList.add('btn-play');
+            }
+            currentPlayButton = null;
+        }
+
+        function closePlayer() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            const audioElement = document.getElementById('audioElement');
+
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                // Clean up event listeners
+                if (currentAudio._errorHandler) {
+                    currentAudio.removeEventListener('error', currentAudio._errorHandler);
+                }
+                if (currentAudio._endedHandler) {
+                    currentAudio.removeEventListener('ended', currentAudio._endedHandler);
+                }
+                if (currentAudio._loadstartHandler) {
+                    currentAudio.removeEventListener('loadstart', currentAudio._loadstartHandler);
+                }
+                if (currentAudio._canplayHandler) {
+                    currentAudio.removeEventListener('canplay', currentAudio._canplayHandler);
+                }
+            }
+
+            audioPlayer.classList.remove('active');
+            audioElement.src = '';
+            audioElement.load(); // Reset the audio element completely
+            resetPlayButton();
+            currentAudio = null;
+        }
+    </script>
+</body>
+</html>
