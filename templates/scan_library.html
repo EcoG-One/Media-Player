@@ -179,6 +179,20 @@
         .info-section li {
             margin-bottom: 5px;
         }
+        .supported-formats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .format-tag {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -188,13 +202,19 @@
         <h1>📁 Scan Music Library</h1>
 
         <div class="info-section">
+            <h3>Library Scanning Information</h3>
+            <p>This tool will scan your music folder and extract metadata from audio files to populate the database. All subfolders will be scanned automatically.</p>
             <h3>What this scan does:</h3>
             <ul>
                 <li><strong>Adds new files:</strong> Discovers and adds new audio files to the database</li>
                 <li><strong>Updates metadata:</strong> Refreshes metadata for existing files if tags have changed</li>
                 <li><strong>Removes missing files:</strong> Cleans up database entries for files that no longer exist</li>
                 <li><strong>Multiple directories:</strong> Scans multiple music library locations simultaneously</li>
-                <li><strong>Supported formats:</strong> MP3, FLAC, M4A, WAV, OGG</li>
+                <li><strong>Supported formats:</strong> <span class="format-tag">MP3</span>
+                <span class="format-tag">FLAC</span>
+                <span class="format-tag">M4A</span>
+                <span class="format-tag">WAV</span>
+                <span class="format-tag">OGG</span></li>
             </ul>
         </div>
 
